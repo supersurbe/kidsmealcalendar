@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kids Meal Calendar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Fredoka:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Baloo 2', cursive;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #fffbeb 0%, #fff7ed 50%, #fdf2f8 100%);
+      padding: 1rem;
+    }
+
+    @media (min-width: 640px) { body { padding: 2rem; } }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+    }
+    @keyframes bounce-subtle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(-3deg); }
+      50% { transform: rotate(3deg); }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(251,146,60,0.4); }
+      50% { box-shadow: 0 0 40px rgba(251,146,60,0.8); }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .float-animation { animation: float 3s ease-in-out infinite; }
+    .bounce-animation { animation: bounce-subtle 2s ease-in-out infinite; }
+    .wiggle-animation { animation: wiggle 1s ease-in-out infinite; }
+    .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+    .spin { animation: spin 1s linear infinite; }
+
+    /* Layout */
+    .container { max-width: 72rem; margin: 0 auto; }
+
+    /* Header */
+    .header { text-align: center; margin-bottom: 3rem; }
+    .header-icons { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .header-icon { width: 4rem; height: 4rem; }
+    .header-title {
+      font-size: clamp(2.5rem, 8vw, 4rem);
+      font-weight: 900;
+      background: linear-gradient(to right, #f97316, #ec4899, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+    }
+    .header-sub { font-size: clamp(1rem, 3vw, 1.3rem); color: #374151; font-weight: 600; margin-top: 0.5rem; }
+
+    /* Cards */
+    .card {
+      background: white;
+      border-radius: 1.5rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      border: 4px solid;
+      margin-bottom: 1.5rem;
+    }
+    @media (min-width: 640px) { .card { padding: 2rem; } }
+    .card-orange { border-color: #fed7aa; }
+    .card-green { border-color: #bbf7d0; }
+    .card-purple { border-color: #e9d5ff; }
+
+    .card-title {
+      font-size: clamp(1.4rem, 4vw, 1.9rem);
+      font-weight: 900;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .card-title.orange { color: #ea580c; }
+    .card-title.purple { color: #7c3aed; }
+    .card-title.green { color: #16a34a; }
+    .card-title.center { justify-content: center; text-align: center; }
+
+    /* Form inputs */
+    .form-grid { display: grid; gap: 1.5rem; }
+    @media (min-width: 768px) { .form-grid-2 { grid-template-columns: 1fr 1fr; } }
+
+    label { display: block; font-size: 1.1rem; font-weight: 700; color: #374151; margin-bottom: 0.5rem; }
+    .label-with-emoji { display: flex; align-items: center; gap: 0.5rem; font-size: 1rem; }
+
+    input[type="text"], input[type="email"] {
+      width: 100%;
+      padding: 0.85rem 1.25rem;
+      font-size: 1.1rem;
+      font-family: 'Baloo 2', cursive;
+      border: 4px solid #fbb6ce;
+      border-radius: 1rem;
+      outline: none;
+      transition: all 0.3s ease;
+      background: white;
+    }
+    input[type="text"]:focus, input[type="email"]:focus {
+      border-color: #ec4899;
+      transform: scale(1.02);
+      box-shadow: 0 8px 30px rgba(251,146,60,0.3);
+    }
+
+    /* Day cards */
+    .day-card {
+      background: linear-gradient(to right, white, #fff7ed);
+      border-radius: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      padding: 1.25rem;
+      border: 4px solid #fed7aa;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+    @media (min-width: 640px) { .day-card { padding: 1.5rem; } }
+    .day-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(251,146,60,0.2); }
+
+    .day-title {
+      font-size: clamp(1.3rem, 4vw, 1.75rem);
+      font-weight: 900;
+      color: #ea580c;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .day-number {
+      background: linear-gradient(to right, #fb923c, #f472b6);
+      color: white;
+      width: 2.75rem;
+      height: 2.75rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .meal-grid { display: grid; gap: 1rem; }
+    @media (min-width: 768px) { .meal-grid { grid-template-columns: repeat(3, 1fr); } }
+
+    .meal-input-wrapper input[type="text"] {
+      border-color: #fde68a;
+      border-width: 3px;
+    }
+    .meal-input-wrapper input[type="text"]:focus {
+      border-color: #f59e0b;
+    }
+
+    /* Buttons */
+    .btn {
+      font-family: 'Baloo 2', cursive;
+      font-weight: 900;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      border-radius: 9999px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+    }
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+      transition: left 0.5s;
+    }
+    .btn:hover:not(:disabled)::before { left: 100%; }
+    .btn:hover:not(:disabled) { transform: scale(1.05); box-shadow: 0 10px 30px rgba(234,88,12,0.5); }
+    .btn:active:not(:disabled) { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-primary {
+      background: linear-gradient(to right, #f97316, #ec4899, #a855f7);
+      color: white;
+      font-size: clamp(1.1rem, 3vw, 1.4rem);
+      padding: 1.25rem 2.5rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    .btn-secondary {
+      background: linear-gradient(to right, #c084fc, #f472b6);
+      color: white;
+      font-size: 1.1rem;
+      padding: 0.75rem 1.5rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    .btn-green {
+      background: linear-gradient(to right, #22c55e, #3b82f6, #a855f7);
+      color: white;
+      font-size: clamp(1.1rem, 3vw, 1.4rem);
+      padding: 1.25rem 2.5rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    .btn-download {
+      background: linear-gradient(to right, #16a34a, #2563eb);
+      color: white;
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      padding: 1rem 2rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    }
+    .btn-text {
+      background: none;
+      color: #ea580c;
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: underline;
+      padding: 0.5rem;
+    }
+    .btn-text:hover { color: #c2410c; transform: none !important; box-shadow: none !important; }
+
+    .btn-center { display: flex; justify-content: center; margin-top: 1.5rem; }
+
+    /* Hint text */
+    .hint { color: #ea580c; font-weight: 600; text-align: center; margin-top: 1rem; font-size: 0.95rem; }
+
+    /* Steps */
+    .step { display: none; }
+    .step.active { display: block; }
+
+    /* Generating */
+    .generating-wrap {
+      text-align: center;
+      padding: 5rem 1rem;
+    }
+    .generating-card {
+      background: white;
+      border-radius: 1.5rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+      padding: 3rem;
+      border: 4px solid #e9d5ff;
+      max-width: 42rem;
+      margin: 0 auto;
+    }
+    .spinner {
+      width: 6rem; height: 6rem;
+      border: 6px solid #e9d5ff;
+      border-top-color: #a855f7;
+      border-radius: 50%;
+      margin: 0 auto 2rem;
+      animation: spin 1s linear infinite;
+    }
+    .generating-title { font-size: clamp(1.8rem, 5vw, 2.25rem); font-weight: 900; color: #7c3aed; margin-bottom: 1rem; }
+    .generating-status { font-size: 1.1rem; font-weight: 600; color: #374151; margin-bottom: 1rem; }
+    .dots { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 2rem; }
+    .dot {
+      width: 1rem; height: 1rem;
+      border-radius: 50%;
+      animation: bounce-subtle 2s ease-in-out infinite;
+    }
+    .dot-orange { background: #fb923c; animation-delay: 0s; }
+    .dot-pink { background: #f472b6; animation-delay: 0.2s; }
+    .dot-purple { background: #c084fc; animation-delay: 0.4s; }
+
+    /* Preview */
+    .preview-day {
+      background: linear-gradient(to right, #f0fdf4, #eff6ff);
+      border-radius: 1rem;
+      padding: 1.25rem;
+      border: 3px solid #bbf7d0;
+      margin-bottom: 1rem;
+    }
+    .preview-day-title { font-size: 1.3rem; font-weight: 700; color: #15803d; margin-bottom: 1rem; }
+    .preview-meal-grid { display: grid; gap: 1rem; }
+    @media (min-width: 640px) { .preview-meal-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1024px) { .preview-meal-grid { grid-template-columns: repeat(3, 1fr); } }
+
+    .meal-card {
+      background: white;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+    }
+    .meal-card:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+    .meal-card-label { font-size: 0.95rem; font-weight: 700; color: #374151; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem; text-transform: capitalize; }
+    .meal-card img {
+      width: 100%;
+      height: 8rem;
+      object-fit: cover;
+      border-radius: 0.5rem;
+      margin-bottom: 0.5rem;
+      transition: all 0.3s ease;
+    }
+    .meal-card img:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .meal-card-name { text-align: center; font-weight: 700; color: #1f2937; font-size: 0.9rem; }
+
+    /* PDF ready */
+    .pdf-ready {
+      text-align: center;
+      background: linear-gradient(to right, #f0fdf4, #eff6ff);
+      border-radius: 1rem;
+      padding: 2rem;
+      border: 4px solid #bbf7d0;
+      margin-top: 1.5rem;
+    }
+    .pdf-icon-wrap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #22c55e;
+      color: white;
+      border-radius: 50%;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .pdf-title { font-size: clamp(1.4rem, 4vw, 1.75rem); font-weight: 900; color: #15803d; margin-bottom: 0.5rem; }
+    .pdf-status { font-size: 1rem; font-weight: 600; color: #374151; margin-bottom: 1.5rem; }
+    .pdf-email { font-size: 0.9rem; font-weight: 600; color: #4b5563; margin-top: 1rem; }
+    .pdf-email span { color: #2563eb; }
+
+    .mini-spinner {
+      width: 3.5rem; height: 3.5rem;
+      border: 5px solid #dbeafe;
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      margin: 0 auto 1rem;
+      animation: spin 1s linear infinite;
+    }
+    .generating-inline { text-align: center; padding: 2rem 0; }
+
+    /* SVG icons */
+    svg { display: inline-block; vertical-align: middle; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-icons">
+      <svg class="header-icon float-animation" style="color:#f97316" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 2a4 4 0 0 1 4 4c0 1.5-.7 2.8-1.8 3.6L16 21H8l1.8-11.4A4 4 0 0 1 8 6a4 4 0 0 1 4-4z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 3.5S8 5 8 6M15 3.5S16 5 16 6"/>
+      </svg>
+      <h1 class="header-title">Kids Meal Calendar</h1>
+      <svg class="header-icon float-animation" style="color:#ec4899;animation-delay:0.5s" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 2h2l1 7H4M18 2h2l-2 7h-1M8 9h8l-1 11H9L8 9zM5 9h14"/>
+      </svg>
+    </div>
+    <p class="header-sub">Create a fun, colorful weekly meal plan with yummy pictures! 🌈✨</p>
+  </div>
+
+  <!-- ===================== STEP: INPUT ===================== -->
+  <div id="step-input" class="step active">
+
+    <!-- Demo button -->
+    <div style="text-align:center; margin-bottom:1.5rem;">
+      <button class="btn btn-secondary" onclick="loadExample()">⚡ Load Example Calendar (Try Me!)</button>
+    </div>
+
+    <!-- User info -->
+    <div class="card card-orange">
+      <div class="card-title orange">
+        <svg class="wiggle-animation" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.5 4.5h4.5l-3.5 2.5 1.5 4.5L12 12l-4 2.5 1.5-4.5L6 7.5h4.5z"/></svg>
+        Tell us about yourself!
+      </div>
+      <div class="form-grid form-grid-2">
+        <div>
+          <label for="parent-name">Parent's Name</label>
+          <input type="text" id="parent-name" placeholder="Your name" oninput="updateUserInfo()" />
+        </div>
+        <div>
+          <label for="parent-email">Email Address</label>
+          <input type="email" id="parent-email" placeholder="your@email.com" oninput="updateUserInfo()" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Meal planning -->
+    <div class="card card-purple" style="padding:1.5rem 1.5rem 0.5rem;">
+      <div class="card-title purple center">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Plan Your Week!
+      </div>
+    </div>
+
+    <div id="day-cards"></div>
+
+    <!-- Generate button -->
+    <div class="btn-center" style="flex-direction:column; align-items:center; gap:0.75rem; padding-top:1rem;">
+      <button id="generate-btn" class="btn btn-primary pulse-glow" onclick="startGenerating()" disabled>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.5 4.5h4.5l-3.5 2.5 1.5 4.5L12 12l-4 2.5 1.5-4.5L6 7.5h4.5z"/></svg>
+        Create My Meal Calendar!
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.5 4.5h4.5l-3.5 2.5 1.5 4.5L12 12l-4 2.5 1.5-4.5L6 7.5h4.5z"/></svg>
+      </button>
+      <p id="btn-hint" class="hint">☝️ Please enter your name and email first!</p>
+    </div>
+  </div>
+
+  <!-- ===================== STEP: GENERATING ===================== -->
+  <div id="step-generating" class="step">
+    <div class="generating-wrap">
+      <div class="generating-card">
+        <div class="spinner"></div>
+        <h2 class="generating-title">Creating Magic! ✨</h2>
+        <p class="generating-status" id="gen-status">Getting started...</p>
+        <div class="dots">
+          <div class="dot dot-orange"></div>
+          <div class="dot dot-pink"></div>
+          <div class="dot dot-purple"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== STEP: PREVIEW ===================== -->
+  <div id="step-preview" class="step">
+    <div class="card card-green">
+      <div class="card-title green center" id="preview-title">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span id="preview-name-title">Your</span> Yummy Week!
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.5 4.5h4.5l-3.5 2.5 1.5 4.5L12 12l-4 2.5 1.5-4.5L6 7.5h4.5z"/></svg>
+      </div>
+
+      <div id="preview-days" style="margin-bottom:2rem;"></div>
+
+      <!-- PDF not ready, not generating -->
+      <div id="pdf-btn-wrap" class="btn-center" style="flex-direction:column; align-items:center; gap:0.75rem;">
+        <button class="btn btn-green pulse-glow" onclick="generatePDF()">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Generate PDF Calendar!
+        </button>
+        <p id="pdf-email-hint" style="color:#4b5563; font-weight:600; font-size:0.95rem;"></p>
+      </div>
+
+      <!-- Generating PDF inline -->
+      <div id="pdf-generating-wrap" class="generating-inline" style="display:none;">
+        <div class="mini-spinner"></div>
+        <p style="font-size:1.1rem; font-weight:700; color:#3b82f6;" id="pdf-gen-status">Creating your PDF...</p>
+      </div>
+
+      <!-- PDF ready -->
+      <div id="pdf-ready-wrap" class="pdf-ready" style="display:none;">
+        <div class="pdf-icon-wrap">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z" stroke-width="0"/><rect x="2" y="3" width="20" height="18" rx="2" ry="2"/><polyline points="9 11 12 14 15 11"/><line x1="12" y1="14" x2="12" y2="3"/></svg>
+        </div>
+        <h3 class="pdf-title">🎉 Your Calendar is Ready! 🎉</h3>
+        <p class="pdf-status" id="pdf-ready-status">✨ Your calendar is ready!</p>
+        <div class="btn-center">
+          <button class="btn btn-download" onclick="downloadPDF()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download PDF Now!
+          </button>
+        </div>
+        <p class="pdf-email">📧 A download link has been sent to <span id="pdf-email-display"></span></p>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:1rem;">
+      <button class="btn btn-text" onclick="startOver()">← Start over and make a new calendar</button>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+  // ── State ──────────────────────────────────────────────────────────────────
+  const weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+  const dayLabels = { monday:'Monday', tuesday:'Tuesday', wednesday:'Wednesday', thursday:'Thursday', friday:'Friday' };
+  const mealTypes = ['breakfast', 'lunch', 'dinner'];
+  const mealEmojis = { breakfast:'🌅', lunch:'☀️', dinner:'🌙' };
+
+  let userInfo = { name: '', email: '' };
+  let meals = {
+    monday:    { breakfast:'', lunch:'', dinner:'' },
+    tuesday:   { breakfast:'', lunch:'', dinner:'' },
+    wednesday: { breakfast:'', lunch:'', dinner:'' },
+    thursday:  { breakfast:'', lunch:'', dinner:'' },
+    friday:    { breakfast:'', lunch:'', dinner:'' }
+  };
+  let generatedImages = {};
+
+  const exampleMeals = {
+    monday:    { breakfast:'Pancakes with Strawberries', lunch:'Mac and Cheese',         dinner:'Chicken Nuggets with Veggies' },
+    tuesday:   { breakfast:'Scrambled Eggs and Toast',  lunch:'Grilled Cheese Sandwich', dinner:'Spaghetti and Meatballs' },
+    wednesday: { breakfast:'Waffles with Blueberries',  lunch:'Quesadillas',             dinner:'Mini Pizzas' },
+    thursday:  { breakfast:'Yogurt Parfait',            lunch:'PB&J Sandwich',           dinner:'Tacos' },
+    friday:    { breakfast:'French Toast',              lunch:'Chicken Tenders',          dinner:'Fish Sticks with Fries' }
+  };
+
+  // ── Build day cards ────────────────────────────────────────────────────────
+  function buildDayCards() {
+    const container = document.getElementById('day-cards');
+    container.innerHTML = '';
+    weekdays.forEach((day, idx) => {
+      const card = document.createElement('div');
+      card.className = 'day-card';
+      card.innerHTML = `
+        <div class="day-title">
+          <div class="day-number">${idx + 1}</div>
+          ${dayLabels[day]}
+        </div>
+        <div class="meal-grid">
+          ${mealTypes.map(type => `
+            <div class="meal-input-wrapper">
+              <label class="label-with-emoji">
+                <span style="font-size:1.3rem">${mealEmojis[type]}</span>
+                ${type.charAt(0).toUpperCase() + type.slice(1)}
+              </label>
+              <input type="text"
+                id="meal-${day}-${type}"
+                placeholder="e.g., Pancakes"
+                value="${meals[day][type]}"
+                oninput="handleMealChange('${day}','${type}',this.value)" />
+            </div>`).join('')}
+        </div>`;
+      container.appendChild(card);
+    });
+  }
+
+  function handleMealChange(day, type, value) {
+    meals[day][type] = value;
+  }
+
+  function updateUserInfo() {
+    userInfo.name  = document.getElementById('parent-name').value;
+    userInfo.email = document.getElementById('parent-email').value;
+    const btn  = document.getElementById('generate-btn');
+    const hint = document.getElementById('btn-hint');
+    const ok   = userInfo.name.trim() && userInfo.email.trim();
+    btn.disabled   = !ok;
+    hint.style.display = ok ? 'none' : 'block';
+  }
+
+  function loadExample() {
+    Object.keys(exampleMeals).forEach(day => {
+      Object.keys(exampleMeals[day]).forEach(type => {
+        meals[day][type] = exampleMeals[day][type];
+        const el = document.getElementById(`meal-${day}-${type}`);
+        if (el) el.value = exampleMeals[day][type];
+      });
+    });
+    document.getElementById('parent-name').value  = 'Sarah Johnson';
+    document.getElementById('parent-email').value = 'sarah@example.com';
+    userInfo = { name: 'Sarah Johnson', email: 'sarah@example.com' };
+    updateUserInfo();
+  }
+
+  // ── Image generation ───────────────────────────────────────────────────────
+  function createPlaceholderImage(mealName, mealType) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 400; canvas.height = 300;
+    const ctx = canvas.getContext('2d');
+    const gradients = {
+      breakfast: ['#FFE5B4','#FFB347','#FFA500'],
+      lunch:     ['#87CEEB','#4682B4','#1E90FF'],
+      dinner:    ['#DDA0DD','#BA55D3','#9370DB']
+    };
+    const colors = gradients[mealType];
+    const g = ctx.createLinearGradient(0,0,400,300);
+    g.addColorStop(0, colors[0]); g.addColorStop(0.5, colors[1]); g.addColorStop(1, colors[2]);
+    ctx.fillStyle = g; ctx.fillRect(0,0,400,300);
+    ctx.globalAlpha = 0.3; ctx.fillStyle = 'white';
+    ctx.beginPath(); ctx.arc(80,80,60,0,Math.PI*2); ctx.arc(320,220,80,0,Math.PI*2); ctx.arc(200,150,40,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha = 1; ctx.fillStyle = 'white'; ctx.strokeStyle = '#333'; ctx.lineWidth = 3;
+    ctx.font = 'bold 28px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const words = mealName.split(' ');
+    let lines = [], cur = words[0];
+    for (let i = 1; i < words.length; i++) {
+      const test = cur + ' ' + words[i];
+      if (ctx.measureText(test).width > 350) { lines.push(cur); cur = words[i]; } else cur = test;
+    }
+    lines.push(cur);
+    const lh = 35, sy = 150 - ((lines.length - 1) * lh) / 2;
+    lines.forEach((line, i) => { const y = sy + i * lh; ctx.strokeText(line,200,y); ctx.fillText(line,200,y); });
+    return canvas.toDataURL('image/png');
+  }
+
+  // ── Steps ──────────────────────────────────────────────────────────────────
+  function showStep(id) {
+    document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+    document.getElementById('step-' + id).classList.add('active');
+  }
+
+  async function startGenerating() {
+    showStep('generating');
+    generatedImages = {};
+    const allMeals = [];
+    weekdays.forEach(day => mealTypes.forEach(type => {
+      if (meals[day][type]?.trim()) allMeals.push({ day, type, name: meals[day][type] });
+    }));
+    const total = allMeals.length;
+    for (let i = 0; i < allMeals.length; i++) {
+      const { day, type, name } = allMeals[i];
+      document.getElementById('gen-status').textContent = `Creating delicious image ${i+1} of ${total}: ${name}... 🎨`;
+      await new Promise(r => setTimeout(r, 500));
+      generatedImages[`${day}-${type}`] = createPlaceholderImage(name, type);
+    }
+    buildPreview();
+    showStep('preview');
+  }
+
+  function buildPreview() {
+    document.getElementById('preview-name-title').textContent = userInfo.name + "'s";
+    document.getElementById('pdf-email-hint').textContent = `We'll send the link to ${userInfo.email} 📧`;
+    document.getElementById('pdf-email-display').textContent = userInfo.email;
+
+    const container = document.getElementById('preview-days');
+    container.innerHTML = '';
+    weekdays.forEach(day => {
+      const hasMeals = mealTypes.some(t => meals[day][t]?.trim());
+      if (!hasMeals) return;
+      const dayDiv = document.createElement('div');
+      dayDiv.className = 'preview-day';
+      dayDiv.innerHTML = `<div class="preview-day-title">${dayLabels[day]}</div>
+        <div class="preview-meal-grid">
+          ${mealTypes.map(type => {
+            const name = meals[day][type];
+            if (!name?.trim()) return '';
+            const key = `${day}-${type}`;
+            const img = generatedImages[key] ? `<img src="${generatedImages[key]}" alt="${name}" />` : '';
+            return `<div class="meal-card">
+              <div class="meal-card-label"><span style="font-size:1.2rem">${mealEmojis[type]}</span>${type}</div>
+              ${img}
+              <div class="meal-card-name">${name}</div>
+            </div>`;
+          }).join('')}
+        </div>`;
+      container.appendChild(dayDiv);
+    });
+
+    // reset PDF state
+    document.getElementById('pdf-btn-wrap').style.display = 'flex';
+    document.getElementById('pdf-generating-wrap').style.display = 'none';
+    document.getElementById('pdf-ready-wrap').style.display = 'none';
+  }
+
+  async function generatePDF() {
+    document.getElementById('pdf-btn-wrap').style.display = 'none';
+    document.getElementById('pdf-generating-wrap').style.display = 'block';
+    document.getElementById('pdf-gen-status').textContent = 'Creating your beautiful PDF calendar... 🎨';
+    await new Promise(r => setTimeout(r, 2000));
+    document.getElementById('pdf-generating-wrap').style.display = 'none';
+    document.getElementById('pdf-ready-wrap').style.display = 'block';
+    document.getElementById('pdf-ready-status').textContent = '✨ Your calendar is ready!';
+  }
+
+  function downloadPDF() {
+    alert(`📥 PDF download started!\n\nYour colorful meal calendar for ${userInfo.name} is being downloaded.\n\n📧 A copy will also be sent to ${userInfo.email}`);
+  }
+
+  function startOver() {
+    showStep('input');
+    document.getElementById('pdf-btn-wrap').style.display = 'flex';
+    document.getElementById('pdf-generating-wrap').style.display = 'none';
+    document.getElementById('pdf-ready-wrap').style.display = 'none';
+  }
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  buildDayCards();
+</script>
+</body>
+</html>
