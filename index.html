@@ -18,12 +18,27 @@
 
   2. In your EmailJS dashboard:
      a) Add an Email Service (Gmail, Outlook, etc.) → note the SERVICE ID
-     b) Create an Email Template. Use these variables in the template:
-          {{to_name}}   — recipient name
-          {{to_email}}  — recipient email  (set as "To Email" field)
-          {{meal_list}} — full meal plan text
+     
+     b) Create an Email Template with these settings:
+        - Subject: Your Kids Meal Calendar for {{to_name}}
+        - Content (example):
+          
+          Hi {{to_name}},
+          
+          Your personalized meal calendar is attached!
+          
+          {{meal_list}}
+          
+          Enjoy your week!
+        
+        - IMPORTANT: In the template settings, add an attachment field:
+          * Click "Add Attachment" 
+          * Name it: pdf_attachment
+          * This allows the PDF to be sent as an attachment
+        
         Note the TEMPLATE ID
-     c) Account → API Keys → copy your PUBLIC KEY
+     
+     c) Go to Account → API Keys → copy your PUBLIC KEY
 
   3. Replace the three placeholder values below with your real ones
      and change EMAIL_ENABLED to true
@@ -31,10 +46,10 @@
   -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script>
-    const EMAILJS_PUBLIC_KEY  = '7ghX9pFLPMd7ye7SQ';   // ← replace
-    const EMAILJS_SERVICE_ID  = 'service_w7s41ct';   // ← replace
-    const EMAILJS_TEMPLATE_ID = 'template_wd7k697';  // ← replace
-    const EMAIL_ENABLED = true; // ← set to true after filling in keys above
+    const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';   // ← replace
+    const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';   // ← replace
+    const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';  // ← replace
+    const EMAIL_ENABLED = false; // ← set to true after filling in keys above
   </script>
 
   <style>
@@ -112,7 +127,6 @@
     .btn-secondary{background:linear-gradient(to right,#c084fc,#f472b6);color:white;font-size:1.1rem;padding:.75rem 1.5rem;box-shadow:0 6px 20px rgba(0,0,0,.15)}
     .btn-green    {background:linear-gradient(to right,#22c55e,#3b82f6,#a855f7);color:white;font-size:clamp(1.1rem,3vw,1.4rem);padding:1.25rem 2.5rem;box-shadow:0 10px 40px rgba(0,0,0,.2)}
     .btn-download {background:linear-gradient(to right,#16a34a,#2563eb);color:white;font-size:clamp(1rem,2.5vw,1.2rem);padding:1rem 2rem;box-shadow:0 8px 30px rgba(0,0,0,.2)}
-    .btn-email    {background:linear-gradient(to right,#0891b2,#7c3aed);color:white;font-size:1rem;padding:1rem 1.75rem;box-shadow:0 8px 30px rgba(0,0,0,.2)}
     .btn-text     {background:none;color:#ea580c;font-size:1rem;font-weight:700;text-decoration:underline;padding:.5rem}
     .btn-text:hover{color:#c2410c;transform:none!important;box-shadow:none!important}
     .btn-center{display:flex;justify-content:center;margin-top:1.5rem}
@@ -250,10 +264,11 @@
 
       <!-- Generate PDF button -->
       <div id="pdf-btn-wrap" class="btn-center" style="flex-direction:column;align-items:center;gap:.75rem">
-        <button class="btn btn-green pulse-glow" onclick="generateAndDownloadPDF()">
+        <button class="btn btn-green pulse-glow" onclick="generateAndEmailPDF()">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download PDF Calendar!
+          Generate & Email PDF Calendar!
         </button>
+        <p id="pdf-email-hint" style="color:#4b5563;font-weight:600;font-size:.95rem">PDF will be downloaded and emailed to you</p>
       </div>
 
       <!-- Generating inline -->
@@ -267,16 +282,12 @@
         <div class="pdf-icon-wrap">
           <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
         </div>
-        <h3 class="pdf-title">🎉 PDF Downloaded!</h3>
-        <p class="pdf-status">Check your downloads folder for your meal calendar ✅</p>
-        <div class="btn-center" style="gap:1rem;flex-wrap:wrap">
-          <button class="btn btn-download" onclick="generateAndDownloadPDF()">
+        <h3 class="pdf-title">🎉 Success!</h3>
+        <p class="pdf-status" id="pdf-result-status">PDF downloaded and emailed! ✅</p>
+        <div class="btn-center">
+          <button class="btn btn-download" onclick="generateAndEmailPDF()">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download Again
-          </button>
-          <button id="send-email-btn" class="btn btn-email" onclick="sendEmail()">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            Email Me the Plan
+            Generate Again
           </button>
         </div>
         <p id="pdf-email-line" class="pdf-note"></p>
@@ -303,6 +314,7 @@
     friday:{breakfast:'',lunch:'',dinner:''}
   };
   let generatedImages = {};
+  let lastGeneratedPDF = null; // Store the PDF blob for emailing
 
   const exampleMeals = {
     monday:   {breakfast:'Pancakes with Strawberries',lunch:'Mac and Cheese',dinner:'Chicken Nuggets with Veggies'},
@@ -316,7 +328,7 @@
   function showToast(msg, type='') {
     const t = document.getElementById('toast');
     t.textContent = msg; t.className = 'toast '+type; t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3500);
+    setTimeout(() => t.classList.remove('show'), 4000);
   }
 
   // Day cards
@@ -415,12 +427,12 @@
     document.getElementById('pdf-ready-wrap').style.display='none';
   }
 
-  // ── REAL PDF (jsPDF) ─────────────────────────────────────────────────────────
-  async function generateAndDownloadPDF(){
+  // ── GENERATE PDF & EMAIL ──────────────────────────────────────────────────────
+  async function generateAndEmailPDF(){
     document.getElementById('pdf-btn-wrap').style.display='none';
     document.getElementById('pdf-generating-wrap').style.display='block';
     document.getElementById('pdf-gen-status').textContent='Building your PDF... 🎨';
-    await new Promise(r=>setTimeout(r,80));
+    await new Promise(r=>setTimeout(r,100));
 
     try {
       const {jsPDF}=window.jspdf;
@@ -461,7 +473,7 @@
       doc.setFont('helvetica','italic'); doc.setFontSize(9); doc.setTextColor(156,163,175);
       doc.text(`${userInfo.email} · Kids Meal Calendar`, W/2, H-6, {align:'center'});
 
-      // ── One detail page per day ───────────────────────────────────────────
+      // ── One detail page per day WITH IMAGES ───────────────────────────────
       const mealCardColors={breakfast:[255,229,180],lunch:[135,206,235],dinner:[221,160,221]};
       weekdays.forEach((day,di)=>{
         if(!mealTypes.some(t=>meals[day][t]?.trim())) return;
@@ -483,8 +495,17 @@
           doc.rect(x,y+12,cW,8,'F');
           doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(60,20,60);
           doc.text(`${mealEmojis[type]} ${type.charAt(0).toUpperCase()+type.slice(1)}`, x+cW/2, y+13, {align:'center'});
+          
+          // ADD IMAGE TO PDF
           const imgKey=`${day}-${type}`;
-          if(generatedImages[imgKey]){try{doc.addImage(generatedImages[imgKey],'PNG',x+4,y+23,cW-8,58);}catch(e){}}
+          if(generatedImages[imgKey]){
+            try {
+              doc.addImage(generatedImages[imgKey],'PNG',x+4,y+23,cW-8,58);
+            } catch(e) {
+              console.warn('Image add failed:', e);
+            }
+          }
+          
           doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(30,30,30);
           doc.text(doc.splitTextToSize(meal,cW-8), x+cW/2, y+90, {align:'center'});
           doc.setDrawColor(mr,mg,mb); doc.setLineWidth(2); doc.roundedRect(x,y,cW,H-40,4,4,'S');
@@ -493,51 +514,64 @@
         doc.text(`${userInfo.name}'s Kids Meal Calendar · ${dayLabels[day]}`, W/2, H-4, {align:'center'});
       });
 
+      // Save and store PDF
+      const pdfBlob = doc.output('blob');
+      lastGeneratedPDF = pdfBlob;
       doc.save(`${userInfo.name.replace(/\s+/g,'_')}_Meal_Calendar.pdf`);
-      document.getElementById('pdf-generating-wrap').style.display='none';
-      document.getElementById('pdf-ready-wrap').style.display='block';
+      
+      document.getElementById('pdf-gen-status').textContent='Sending email... 📧';
 
-      // Email button
+      // EMAIL THE PDF
       if(!EMAIL_ENABLED){
-        document.getElementById('send-email-btn').style.display='none';
+        document.getElementById('pdf-generating-wrap').style.display='none';
+        document.getElementById('pdf-ready-wrap').style.display='block';
+        document.getElementById('pdf-result-status').textContent='PDF downloaded! ✅';
         document.getElementById('pdf-email-line').textContent='💡 To enable email delivery, see the EmailJS setup instructions in the HTML file.';
+        showToast('✅ PDF downloaded! Email not configured.','success');
       } else {
-        document.getElementById('send-email-btn').style.display='inline-flex';
-        document.getElementById('pdf-email-line').textContent='';
+        // Convert blob to base64 for EmailJS attachment
+        const reader = new FileReader();
+        reader.onloadend = async function() {
+          const base64data = reader.result.split(',')[1];
+          
+          // Build meal list text
+          let mealList='';
+          weekdays.forEach(day=>{
+            const lines=mealTypes.map(t=>meals[day][t]?.trim()?`  ${mealEmojis[t]} ${t}: ${meals[day][t]}`:null).filter(Boolean);
+            if(lines.length) mealList+=`\n📅 ${dayLabels[day]}\n${lines.join('\n')}\n`;
+          });
+
+          try {
+            emailjs.init(EMAILJS_PUBLIC_KEY);
+            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+              to_name: userInfo.name,
+              to_email: userInfo.email,
+              meal_list: mealList,
+              pdf_attachment: base64data
+            });
+            
+            document.getElementById('pdf-generating-wrap').style.display='none';
+            document.getElementById('pdf-ready-wrap').style.display='block';
+            document.getElementById('pdf-result-status').textContent='PDF downloaded & emailed! ✅';
+            document.getElementById('pdf-email-line').textContent=`📧 Email sent to ${userInfo.email}`;
+            showToast(`✅ PDF sent to ${userInfo.email}!`,'success');
+          } catch(err){
+            console.error('EmailJS error:',err);
+            document.getElementById('pdf-generating-wrap').style.display='none';
+            document.getElementById('pdf-ready-wrap').style.display='block';
+            document.getElementById('pdf-result-status').textContent='PDF downloaded but email failed ⚠️';
+            document.getElementById('pdf-email-line').textContent='Check your EmailJS configuration in the HTML file.';
+            showToast('✅ PDF downloaded, but email failed','error');
+          }
+        };
+        reader.readAsDataURL(pdfBlob);
       }
-      showToast('✅ PDF downloaded!','success');
 
     } catch(err){
       console.error('PDF error:',err);
       document.getElementById('pdf-generating-wrap').style.display='none';
       document.getElementById('pdf-btn-wrap').style.display='flex';
       showToast('❌ PDF failed — see browser console','error');
-    }
-  }
-
-  // ── REAL EMAIL (EmailJS) ──────────────────────────────────────────────────────
-  async function sendEmail(){
-    if(!EMAIL_ENABLED){ showToast('⚠️ Email not configured yet','error'); return; }
-    const btn=document.getElementById('send-email-btn');
-    btn.disabled=true; btn.textContent='Sending...';
-    let mealList='';
-    weekdays.forEach(day=>{
-      const lines=mealTypes.map(t=>meals[day][t]?.trim()?`  ${mealEmojis[t]} ${t}: ${meals[day][t]}`:null).filter(Boolean);
-      if(lines.length) mealList+=`\n📅 ${dayLabels[day]}\n${lines.join('\n')}\n`;
-    });
-    try {
-      emailjs.init(EMAILJS_PUBLIC_KEY);
-      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-        to_name: userInfo.name, to_email: userInfo.email, meal_list: mealList
-      });
-      showToast(`✅ Email sent to ${userInfo.email}!`,'success');
-      document.getElementById('pdf-email-line').textContent=`📧 Email sent to ${userInfo.email} ✓`;
-    } catch(err){
-      console.error('EmailJS error:',err);
-      showToast('❌ Email failed — check your EmailJS keys','error');
-    } finally {
-      btn.disabled=false;
-      btn.innerHTML=`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email Me the Plan`;
     }
   }
 
